@@ -1,0 +1,37 @@
+<div class="page-header">
+  <h1>New Audience</h1>
+  <%= link_to "Back", audiences_path, class: "btn btn-secondary" %>
+</div>
+
+<div class="form-container">
+  <%= form_with model: @audience, local: true do |form| %>
+    <% if @audience.errors.any? %>
+      <div class="alert alert-error">
+        <h3><%= pluralize(@audience.errors.count, "error") %> prohibited this audience from being saved:</h3>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <% @audience.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= form.label :name, "Audience Name" %>
+      <%= form.text_field :name, required: true, placeholder: "e.g., Marketing Leads, VIP Customers", autofocus: true %>
+      <small style="color: var(--gray); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+        Give your audience a descriptive name
+      </small>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :description %>
+      <%= form.text_area :description, rows: 4, placeholder: "Optional: Describe the purpose or criteria for this audience" %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Create Audience", class: "btn btn-primary" %>
+      <%= link_to "Cancel", audiences_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

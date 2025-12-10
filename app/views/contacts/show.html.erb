@@ -1,0 +1,95 @@
+<div class="page-header">
+  <h1><%= @contact.first_name %> <%= @contact.last_name %></h1>
+  <div class="action-links">
+    <%= link_to "Edit", edit_contact_path(@contact), class: "btn btn-secondary" %>
+    <%= link_to "Delete", contact_path(@contact), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete '#{@contact.first_name} #{@contact.last_name}'? This action cannot be undone." }, class: "btn btn-danger" %>
+    <%= link_to "Back", contacts_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Contact Details</h2>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+    <div>
+      <strong>Email:</strong>
+      <div><%= @contact.email %></div>
+    </div>
+    <div>
+      <strong>Job Title:</strong>
+      <div><%= @contact.job_title %></div>
+    </div>
+    <div>
+      <strong>Company:</strong>
+      <div><%= @contact.company %></div>
+    </div>
+  </div>
+</div>
+
+<% if @contact.age_range.present? || @contact.gender.present? || @contact.income_range.present? || @contact.education_level.present? || @contact.occupation.present? || @contact.marital_status.present? || @contact.family_status.present? %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Demographics</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+      <% if @contact.age_range.present? %>
+        <div>
+          <strong>Age Range:</strong>
+          <div><%= @contact.age_range %></div>
+        </div>
+      <% end %>
+      <% if @contact.gender.present? %>
+        <div>
+          <strong>Gender:</strong>
+          <div><%= @contact.gender.humanize %></div>
+        </div>
+      <% end %>
+      <% if @contact.income_range.present? %>
+        <div>
+          <strong>Income Range:</strong>
+          <div><%= format_income_range(@contact.income_range) %></div>
+        </div>
+      <% end %>
+      <% if @contact.education_level.present? %>
+        <div>
+          <strong>Education Level:</strong>
+          <div><%= @contact.education_level.humanize.gsub('_', ' ') %></div>
+        </div>
+      <% end %>
+      <% if @contact.occupation.present? %>
+        <div>
+          <strong>Occupation:</strong>
+          <div><%= @contact.occupation %></div>
+        </div>
+      <% end %>
+      <% if @contact.marital_status.present? %>
+        <div>
+          <strong>Marital Status:</strong>
+          <div><%= @contact.marital_status.humanize.gsub('_', ' ') %></div>
+        </div>
+      <% end %>
+      <% if @contact.family_status.present? %>
+        <div>
+          <strong>Family Status:</strong>
+          <div><%= @contact.family_status.humanize.gsub('_', ' ') %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @contact.audiences.any? %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Audiences (<%= @contact.audiences.count %>)</h2>
+    </div>
+    <ul style="list-style: none; padding: 0;">
+      <% @contact.audiences.each do |audience| %>
+        <li style="padding: 0.75rem; border-bottom: 1px solid var(--gray-light);">
+          <%= link_to audience.name, audience, style: "color: var(--primary); text-decoration: none; font-weight: 500;" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

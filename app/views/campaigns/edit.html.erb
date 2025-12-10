@@ -1,0 +1,86 @@
+<div class="page-header">
+  <h1>Edit Campaign</h1>
+  <%= link_to "Back", @campaign, class: "btn btn-secondary" %>
+</div>
+
+<div class="form-container">
+  <%= form_with model: @campaign do |form| %>
+    <% if @campaign.errors.any? %>
+      <div class="alert alert-error">
+        <h3><%= pluralize(@campaign.errors.count, "error") %> prohibited this campaign from being saved:</h3>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <% @campaign.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= form.label :name %>
+      <%= form.text_field :name, required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :objective %>
+      <%= form.text_field :objective, required: true, placeholder: "e.g., Lead Generation, Brand Awareness" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :budget %>
+      <%= form.number_field :budget, step: 0.01, min: 0, required: true, placeholder: "0.00" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :channel %>
+      <%= form.select :channel, options_for_select([
+        ['Meta', 'meta'],
+        ['Google', 'google'],
+        ['LinkedIn', 'linkedin']
+      ], @campaign.channel), { prompt: 'Select a channel' }, { required: true } %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :external_id, "External ID (optional)" %>
+      <%= form.text_field :external_id, placeholder: "External platform ID" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :audience_ids, "Select Audiences" %>
+      <% if @audiences.any? %>
+        <%= hidden_field_tag "campaign[audience_ids][]", "" %>
+        <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gray-light); border-radius: var(--radius); padding: 1rem; margin-top: 0.5rem;">
+          <% @audiences.each do |audience| %>
+            <label style="display: flex; align-items: center; padding: 0.5rem 0; cursor: pointer; border-bottom: 1px solid var(--gray-light);">
+              <%= check_box_tag "campaign[audience_ids][]", audience.id, @campaign.audience_ids.include?(audience.id), id: "campaign_audience_ids_#{audience.id}", style: "margin-right: 0.75rem;" %>
+              <div style="flex: 1;">
+                <strong><%= audience.name %></strong>
+                <% if audience.description.present? %>
+                  <div style="color: var(--gray); font-size: 0.875rem;"><%= truncate(audience.description, length: 60) %></div>
+                <% end %>
+                <div style="color: var(--gray); font-size: 0.75rem; margin-top: 0.25rem;">
+                  <%= pluralize(audience.contacts.count, 'contact') %> • 
+                  <span class="badge badge-<%= audience.status || 'draft' %>" style="font-size: 0.7rem; padding: 0.125rem 0.5rem;">
+                    <%= (audience.status || 'draft').capitalize %>
+                  </span>
+                </div>
+              </div>
+            </label>
+          <% end %>
+        </div>
+        <small style="color: var(--gray); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+          Select one or more audiences to target with this campaign
+        </small>
+      <% else %>
+        <div style="padding: 1rem; background-color: var(--light); border-radius: var(--radius); margin-top: 0.5rem;">
+          <p style="color: var(--gray); margin: 0;">No audiences available. <%= link_to "Create an audience", new_audience_path %> first.</p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Update Campaign", class: "btn btn-primary" %>
+      <%= link_to "Cancel", @campaign, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,135 @@
+<div class="page-header">
+  <h1>Edit Contact</h1>
+  <%= link_to "Back", @contact, class: "btn btn-secondary" %>
+</div>
+
+<div class="form-container">
+  <%= form_with model: @contact do |form| %>
+    <% if @contact.errors.any? %>
+      <div class="alert alert-error">
+        <h3><%= pluralize(@contact.errors.count, "error") %> prohibited this contact from being saved:</h3>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <% @contact.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= form.label :first_name %>
+      <%= form.text_field :first_name, required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :last_name %>
+      <%= form.text_field :last_name, required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :email %>
+      <%= form.email_field :email, required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :job_title %>
+      <%= form.text_field :job_title %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :company %>
+      <%= form.text_field :company %>
+    </div>
+
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--gray-light);">
+      <h3 style="margin-bottom: 1rem; color: var(--dark);">Demographics (Optional)</h3>
+      <p style="color: var(--gray); font-size: 0.875rem; margin-bottom: 1.5rem;">
+        Add demographic information to enable smart audience suggestions
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+          <%= form.label :age_range, "Age Range" %>
+          <%= form.select :age_range, options_for_select([
+            ['', ''],
+            ['18-24', '18-24'],
+            ['25-34', '25-34'],
+            ['35-44', '35-44'],
+            ['45-54', '45-54'],
+            ['55-64', '55-64'],
+            ['65+', '65+']
+          ], @contact.age_range) %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :gender %>
+          <%= form.select :gender, options_for_select([
+            ['', ''],
+            ['Male', 'male'],
+            ['Female', 'female'],
+            ['Non-binary', 'non-binary'],
+            ['Prefer not to say', 'prefer_not_to_say']
+          ], @contact.gender) %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :income_range, "Income Range" %>
+          <%= form.select :income_range, options_for_select([
+            ['', ''],
+            ['Under $25,000', 'under_25k'],
+            ['$25,000 - $49,999', '25k_49k'],
+            ['$50,000 - $74,999', '50k_74k'],
+            ['$75,000 - $99,999', '75k_99k'],
+            ['$100,000 - $149,999', '100k_149k'],
+            ['$150,000+', '150k_plus']
+          ], @contact.income_range) %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :education_level, "Education Level" %>
+          <%= form.select :education_level, options_for_select([
+            ['', ''],
+            ['High School', 'high_school'],
+            ['Some College', 'some_college'],
+            ['Associate Degree', 'associate'],
+            ['Bachelor\'s Degree', 'bachelors'],
+            ['Master\'s Degree', 'masters'],
+            ['Doctorate', 'doctorate']
+          ], @contact.education_level) %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :occupation %>
+          <%= form.text_field :occupation, placeholder: "e.g., Software Engineer, Teacher" %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :marital_status, "Marital Status" %>
+          <%= form.select :marital_status, options_for_select([
+            ['', ''],
+            ['Single', 'single'],
+            ['Married', 'married'],
+            ['Divorced', 'divorced'],
+            ['Widowed', 'widowed'],
+            ['Domestic Partnership', 'domestic_partnership']
+          ], @contact.marital_status) %>
+        </div>
+
+        <div class="form-group">
+          <%= form.label :family_status, "Family Status" %>
+          <%= form.select :family_status, options_for_select([
+            ['', ''],
+            ['No Children', 'no_children'],
+            ['Has Children', 'has_children'],
+            ['Empty Nester', 'empty_nester']
+          ], @contact.family_status) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Update Contact", class: "btn btn-primary" %>
+      <%= link_to "Cancel", @contact, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

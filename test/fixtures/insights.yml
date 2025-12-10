@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  campaign: one
+  impressions: 1
+  clicks: 1
+  spend: 9.99
+  conversions: 1
+
+two:
+  campaign: two
+  impressions: 1
+  clicks: 1
+  spend: 9.99
+  conversions: 1

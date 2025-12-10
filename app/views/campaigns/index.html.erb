@@ -1,0 +1,87 @@
+<div class="page-header">
+  <h1>Campaigns</h1>
+  <%= link_to "New Campaign", new_campaign_path, class: "btn btn-primary" %>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <%= form_with url: campaigns_path, method: :get, local: true, class: "search-filter-form" do |form| %>
+    <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; align-items: end;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :search, "Search Campaigns" %>
+        <%= form.text_field :search, value: params[:search], placeholder: "Search by name, objective, or external ID...", class: "search-input" %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :channel, "Filter by Channel" %>
+        <%= form.select :channel, options_for_select([
+          ['All Channels', ''],
+          ['Meta', 'meta'],
+          ['Google', 'google'],
+          ['LinkedIn', 'linkedin']
+        ], params[:channel]), {}, { class: "filter-select" } %>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <%= form.submit "Search", class: "btn btn-primary" %>
+        <% if params[:search].present? || params[:channel].present? %>
+          <%= link_to "Clear", campaigns_path, class: "btn btn-secondary" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if params[:search].present? || params[:channel].present? %>
+  <div style="margin-bottom: 1rem; color: var(--gray);">
+    <%= pluralize(@campaigns.count, 'campaign') %> found
+    <% if params[:search].present? %>
+      for "<strong><%= params[:search] %></strong>"
+    <% end %>
+    <% if params[:channel].present? %>
+      in <strong><%= params[:channel].capitalize %></strong> channel
+    <% end %>
+  </div>
+<% end %>
+
+<% if @campaigns.any? %>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Channel</th>
+          <th>Objective</th>
+          <th>Budget</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @campaigns.each do |campaign| %>
+          <tr>
+            <td><strong><%= link_to campaign.name, campaign, style: "color: var(--primary); text-decoration: none;" %></strong></td>
+            <td><span class="badge badge-<%= campaign.channel %>"><%= campaign.channel.capitalize %></span></td>
+            <td><%= campaign.objective %></td>
+            <td>$<%= number_with_precision(campaign.budget, precision: 2) %></td>
+            <td>
+              <div class="action-links">
+                <%= link_to "View", campaign %>
+                <%= link_to "Edit", edit_campaign_path(campaign) %>
+                <%= link_to "Delete", campaign_path(campaign), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete '#{campaign.name}'? This action cannot be undone." }, class: "text-danger" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card empty-state">
+    <% if params[:search].present? || params[:channel].present? %>
+      <h3>No campaigns found</h3>
+      <p>Try adjusting your search or filter criteria.</p>
+      <%= link_to "Clear Filters", campaigns_path, class: "btn btn-secondary" %>
+    <% else %>
+      <h3>No campaigns yet</h3>
+      <p>Get started by creating your first campaign.</p>
+      <%= link_to "Create Campaign", new_campaign_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>

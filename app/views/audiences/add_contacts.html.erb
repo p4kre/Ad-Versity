@@ -1,0 +1,277 @@
+<div class="page-header">
+  <h1>Add Contacts to <%= @audience.name %></h1>
+  <%= link_to "Back", @audience, class: "btn btn-secondary" %>
+</div>
+
+<!-- Demographic Filters (Outside main form) -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3 style="margin: 0;">Filter Contacts by Demographics</h3>
+    <% if @audience.contacts.any? && @demographics&.any? %>
+      <%= link_to "🎯 Apply Audience Profile", add_contacts_audience_path(@audience, 
+        filter_age_range: @demographics[:age_range],
+        filter_gender: @demographics[:gender],
+        filter_income_range: @demographics[:income_range],
+        filter_education_level: @demographics[:education_level],
+        filter_occupation: @demographics[:occupation],
+        filter_marital_status: @demographics[:marital_status],
+        filter_family_status: @demographics[:family_status]
+      ), class: "btn btn-secondary", style: "font-size: 0.875rem; padding: 0.5rem 1rem;" %>
+    <% end %>
+  </div>
+  <%= form_with url: add_contacts_audience_path(@audience), method: :get, local: true, class: "search-filter-form" do |filter_form| %>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_age_range, "Age Range" %>
+        <%= filter_form.select :filter_age_range, options_for_select([
+          ['All Ages', ''],
+          ['18-24', '18-24'],
+          ['25-34', '25-34'],
+          ['35-44', '35-44'],
+          ['45-54', '45-54'],
+          ['55-64', '55-64'],
+          ['65+', '65+']
+        ], params[:filter_age_range]), {}, { class: "filter-select" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_gender, "Gender" %>
+        <%= filter_form.select :filter_gender, options_for_select([
+          ['All Genders', ''],
+          ['Male', 'male'],
+          ['Female', 'female'],
+          ['Non-binary', 'non-binary'],
+          ['Prefer not to say', 'prefer_not_to_say']
+        ], params[:filter_gender]), {}, { class: "filter-select" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_income_range, "Income Range" %>
+        <%= filter_form.select :filter_income_range, options_for_select([
+          ['All Incomes', ''],
+          ['Under $25,000', 'under_25k'],
+          ['$25,000 - $49,999', '25k_49k'],
+          ['$50,000 - $74,999', '50k_74k'],
+          ['$75,000 - $99,999', '75k_99k'],
+          ['$100,000 - $149,999', '100k_149k'],
+          ['$150,000+', '150k_plus']
+        ], params[:filter_income_range]), {}, { class: "filter-select" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_education_level, "Education" %>
+        <%= filter_form.select :filter_education_level, options_for_select([
+          ['All Education Levels', ''],
+          ['High School', 'high_school'],
+          ['Some College', 'some_college'],
+          ['Associate Degree', 'associate'],
+          ['Bachelor\'s Degree', 'bachelors'],
+          ['Master\'s Degree', 'masters'],
+          ['Doctorate', 'doctorate']
+        ], params[:filter_education_level]), {}, { class: "filter-select" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_occupation, "Occupation" %>
+        <%= filter_form.text_field :filter_occupation, value: params[:filter_occupation], placeholder: "e.g., Engineer, Teacher", class: "search-input" %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_marital_status, "Marital Status" %>
+        <%= filter_form.select :filter_marital_status, options_for_select([
+          ['All Statuses', ''],
+          ['Single', 'single'],
+          ['Married', 'married'],
+          ['Divorced', 'divorced'],
+          ['Widowed', 'widowed'],
+          ['Domestic Partnership', 'domestic_partnership']
+        ], params[:filter_marital_status]), {}, { class: "filter-select" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= filter_form.label :filter_family_status, "Family Status" %>
+        <%= filter_form.select :filter_family_status, options_for_select([
+          ['All Statuses', ''],
+          ['No Children', 'no_children'],
+          ['Has Children', 'has_children'],
+          ['Empty Nester', 'empty_nester']
+        ], params[:filter_family_status]), {}, { class: "filter-select" } %>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 0.5rem; align-items: end;">
+      <%= filter_form.submit "Apply Filters", class: "btn btn-primary" %>
+      <% if params[:filter_age_range].present? || params[:filter_gender].present? || params[:filter_income_range].present? || params[:filter_education_level].present? || params[:filter_occupation].present? || params[:filter_marital_status].present? || params[:filter_family_status].present? %>
+        <%= link_to "Clear Filters", add_contacts_audience_path(@audience), class: "btn btn-secondary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Active Filters Display -->
+<% if params[:filter_age_range].present? || params[:filter_gender].present? || params[:filter_income_range].present? || params[:filter_education_level].present? || params[:filter_occupation].present? || params[:filter_marital_status].present? || params[:filter_family_status].present? %>
+  <div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light); border-radius: var(--radius); border-left: 4px solid var(--primary);">
+    <strong style="display: block; margin-bottom: 0.5rem; color: var(--dark);">Active Filters:</strong>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+      <% if params[:filter_age_range].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Age: <%= params[:filter_age_range] %></span>
+      <% end %>
+      <% if params[:filter_gender].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Gender: <%= params[:filter_gender].humanize %></span>
+      <% end %>
+      <% if params[:filter_income_range].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Income: <%= format_income_range(params[:filter_income_range]) %></span>
+      <% end %>
+      <% if params[:filter_education_level].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Education: <%= params[:filter_education_level].humanize.gsub('_', ' ') %></span>
+      <% end %>
+      <% if params[:filter_occupation].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Occupation: <%= params[:filter_occupation] %></span>
+      <% end %>
+      <% if params[:filter_marital_status].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Marital: <%= params[:filter_marital_status].humanize.gsub('_', ' ') %></span>
+      <% end %>
+      <% if params[:filter_family_status].present? %>
+        <span class="badge badge-primary" style="font-size: 0.75rem;">Family: <%= params[:filter_family_status].humanize.gsub('_', ' ') %></span>
+      <% end %>
+    </div>
+    <div style="margin-top: 0.5rem; color: var(--gray); font-size: 0.875rem;">
+      Showing <%= pluralize(@contacts.count, 'contact') %> matching your filters
+    </div>
+  </div>
+<% end %>
+
+<div class="form-container">
+  <%= form_with url: add_contacts_audience_path(@audience), method: :post, local: true do |form| %>
+    <% if @audience.contacts.any? && @suggested_contacts&.any? %>
+      <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+          <div>
+            <h2 style="color: white; margin-bottom: 0.5rem;">✨ Smart Suggestions</h2>
+            <p style="color: rgba(255,255,255,0.9); margin: 0;">
+              Based on demographics of existing contacts in this audience
+            </p>
+          </div>
+        </div>
+        
+        <% if @demographics&.any? %>
+          <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius);">
+            <strong style="display: block; margin-bottom: 0.5rem;">Audience Profile:</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.875rem;">
+              <% if @demographics[:age_range].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Age: <%= @demographics[:age_range] %></span>
+              <% end %>
+              <% if @demographics[:gender].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Gender: <%= @demographics[:gender].humanize %></span>
+              <% end %>
+              <% if @demographics[:income_range].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Income: <%= format_income_range(@demographics[:income_range]) %></span>
+              <% end %>
+              <% if @demographics[:education_level].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Education: <%= @demographics[:education_level].humanize.gsub('_', ' ') %></span>
+              <% end %>
+              <% if @demographics[:occupation].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Occupation: <%= @demographics[:occupation] %></span>
+              <% end %>
+              <% if @demographics[:marital_status].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Marital: <%= @demographics[:marital_status].humanize.gsub('_', ' ') %></span>
+              <% end %>
+              <% if @demographics[:family_status].present? %>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm);">Family: <%= @demographics[:family_status].humanize.gsub('_', ' ') %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div style="max-height: 300px; overflow-y: auto; background: white; border-radius: var(--radius); padding: 1rem;">
+          <% @suggested_contacts.each do |contact| %>
+            <label style="display: flex; align-items: center; padding: 0.75rem; border-bottom: 1px solid var(--gray-light); cursor: pointer; color: var(--dark);">
+              <%= check_box_tag "contact_ids[]", contact.id, false, id: "suggested_contact_#{contact.id}", style: "margin-right: 0.75rem;" %>
+              <div style="flex: 1;">
+                <strong><%= "#{contact.first_name} #{contact.last_name}" %></strong>
+                <div style="color: var(--gray); font-size: 0.875rem;"><%= contact.email %></div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem; flex-wrap: wrap;">
+                  <% if contact.age_range.present? %>
+                    <span style="font-size: 0.75rem; color: var(--gray);">Age: <%= contact.age_range %></span>
+                  <% end %>
+                  <% if contact.gender.present? %>
+                    <span style="font-size: 0.75rem; color: var(--gray);">Gender: <%= contact.gender.humanize %></span>
+                  <% end %>
+                  <% if contact.occupation.present? %>
+                    <span style="font-size: 0.75rem; color: var(--gray);">Occupation: <%= contact.occupation %></span>
+                  <% end %>
+                </div>
+              </div>
+            </label>
+          <% end %>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.9);">
+          💡 These contacts match the demographic profile of your existing audience members
+        </p>
+      </div>
+    <% end %>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h3 style="margin-bottom: 1rem;">
+        <% if params[:filter_age_range].present? || params[:filter_gender].present? || params[:filter_income_range].present? || params[:filter_education_level].present? || params[:filter_occupation].present? || params[:filter_marital_status].present? || params[:filter_family_status].present? %>
+          Filtered Contacts (<%= @contacts.count %>)
+        <% else %>
+          All Contacts (<%= Contact.where.not(id: @audience.contact_ids).count %>)
+        <% end %>
+      </h3>
+      <% if @contacts.any? %>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--gray-light); border-radius: var(--radius); padding: 1rem;">
+          <% @contacts.each do |contact| %>
+            <label style="display: flex; align-items: center; padding: 0.75rem; border-bottom: 1px solid var(--gray-light); cursor: pointer;">
+              <%= check_box_tag "contact_ids[]", contact.id, @audience_contact_ids.include?(contact.id), id: "contact_#{contact.id}", style: "margin-right: 0.75rem;" %>
+              <div style="flex: 1;">
+                <strong><%= "#{contact.first_name} #{contact.last_name}" %></strong>
+                <div style="color: var(--gray); font-size: 0.875rem;"><%= contact.email %></div>
+                <% if contact.age_range.present? || contact.gender.present? || contact.occupation.present? %>
+                  <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem; flex-wrap: wrap;">
+                    <% if contact.age_range.present? %>
+                      <span style="font-size: 0.75rem; color: var(--gray);">Age: <%= contact.age_range %></span>
+                    <% end %>
+                    <% if contact.gender.present? %>
+                      <span style="font-size: 0.75rem; color: var(--gray);">Gender: <%= contact.gender.humanize %></span>
+                    <% end %>
+                    <% if contact.occupation.present? %>
+                      <span style="font-size: 0.75rem; color: var(--gray);">Occupation: <%= contact.occupation %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state" style="padding: 2rem;">
+          <% if params[:filter_age_range].present? || params[:filter_gender].present? || params[:filter_income_range].present? || params[:filter_education_level].present? || params[:filter_occupation].present? || params[:filter_marital_status].present? || params[:filter_family_status].present? %>
+            <h3>No contacts match your filters</h3>
+            <p>Try adjusting your filter criteria or <%= link_to "clear filters", add_contacts_audience_path(@audience), style: "color: var(--primary);" %> to see all contacts.</p>
+          <% else %>
+            <h3>No contacts available</h3>
+            <p><%= link_to "Create a contact", new_contact_path, style: "color: var(--primary);" %> first.</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Add Selected Contacts", class: "btn btn-primary", disabled: @contacts.empty? %>
+      <%= link_to "Cancel", @audience, class: "btn btn-secondary" %>
+    </div>
+    
+    <!-- Preserve filter params in hidden fields for form submission -->
+    <% if params[:filter_age_range].present? || params[:filter_gender].present? || params[:filter_income_range].present? || params[:filter_education_level].present? || params[:filter_occupation].present? || params[:filter_marital_status].present? || params[:filter_family_status].present? %>
+      <%= hidden_field_tag :filter_age_range, params[:filter_age_range] if params[:filter_age_range].present? %>
+      <%= hidden_field_tag :filter_gender, params[:filter_gender] if params[:filter_gender].present? %>
+      <%= hidden_field_tag :filter_income_range, params[:filter_income_range] if params[:filter_income_range].present? %>
+      <%= hidden_field_tag :filter_education_level, params[:filter_education_level] if params[:filter_education_level].present? %>
+      <%= hidden_field_tag :filter_occupation, params[:filter_occupation] if params[:filter_occupation].present? %>
+      <%= hidden_field_tag :filter_marital_status, params[:filter_marital_status] if params[:filter_marital_status].present? %>
+      <%= hidden_field_tag :filter_family_status, params[:filter_family_status] if params[:filter_family_status].present? %>
+    <% end %>
+  <% end %>
+</div>
+

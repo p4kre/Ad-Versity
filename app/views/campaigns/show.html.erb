@@ -1,0 +1,114 @@
+<div class="page-header">
+  <h1><%= @campaign.name %></h1>
+  <div class="action-links">
+    <%= link_to "Edit", edit_campaign_path(@campaign), class: "btn btn-secondary" %>
+    <%= link_to "Delete", campaign_path(@campaign), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete '#{@campaign.name}'? This action cannot be undone." }, class: "btn btn-danger" %>
+    <%= link_to "Back", campaigns_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Campaign Details</h2>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+    <div>
+      <strong>Channel:</strong>
+      <div><span class="badge badge-<%= @campaign.channel %>"><%= @campaign.channel.capitalize %></span></div>
+    </div>
+    <div>
+      <strong>Objective:</strong>
+      <div><%= @campaign.objective %></div>
+    </div>
+    <div>
+      <strong>Budget:</strong>
+      <div>$<%= number_with_precision(@campaign.budget, precision: 2) %></div>
+    </div>
+    <% if @campaign.external_id.present? %>
+      <div>
+        <strong>External ID:</strong>
+        <div><%= @campaign.external_id %></div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @campaign.audiences.any? %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Target Audiences (<%= @campaign.audiences.count %>)</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+      <% @campaign.audiences.each do |audience| %>
+        <div style="padding: 1rem; border: 1px solid var(--gray-light); border-radius: var(--radius);">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+            <strong><%= link_to audience.name, audience, style: "color: var(--primary); text-decoration: none;" %></strong>
+            <span class="badge badge-<%= audience.status || 'draft' %>" style="font-size: 0.7rem;">
+              <%= (audience.status || 'draft').capitalize %>
+            </span>
+          </div>
+          <% if audience.description.present? %>
+            <p style="color: var(--gray); font-size: 0.875rem; margin: 0.5rem 0;"><%= truncate(audience.description, length: 80) %></p>
+          <% end %>
+          <div style="color: var(--gray); font-size: 0.75rem;">
+            <%= pluralize(audience.contacts.count, 'contact') %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Actions</h2>
+  </div>
+  <% if @campaign.external_id.present? %>
+    <%= button_to "Fetch Insights", fetch_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+    <p style="margin-top: 0.75rem; color: var(--gray); font-size: 0.875rem;">
+      External ID: <code><%= @campaign.external_id %></code>
+    </p>
+  <% else %>
+    <div style="padding: 1rem; background-color: #fef3c7; border-radius: var(--radius); color: #92400e;">
+      <strong>⚠️ External ID Required</strong>
+      <p style="margin-top: 0.5rem; margin-bottom: 0;">Please add an External ID to this campaign before fetching insights.</p>
+      <%= link_to "Edit Campaign", edit_campaign_path(@campaign), class: "btn btn-secondary btn-sm", style: "margin-top: 0.75rem;" %>
+    </div>
+  <% end %>
+</div>
+
+<% if @campaign.insights.any? %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Insights</h2>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Impressions</th>
+            <th>Clicks</th>
+            <th>Spend</th>
+            <th>Conversions</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @campaign.insights.order(created_at: :desc).each do |insight| %>
+            <tr>
+              <td><%= number_with_delimiter(insight.impressions) %></td>
+              <td><%= number_with_delimiter(insight.clicks) %></td>
+              <td>$<%= number_with_precision(insight.spend, precision: 2) %></td>
+              <td><%= number_with_delimiter(insight.conversions) %></td>
+              <td><%= insight.updated_at.strftime("%B %d, %Y at %I:%M %p") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <div class="card">
+    <p class="empty-state">No insights yet. Click "Fetch Insights" to retrieve campaign data.</p>
+  </div>
+<% end %>

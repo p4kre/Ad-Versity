@@ -1,0 +1,231 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <div class="action-links">
+    <%= link_to "New Campaign", new_campaign_path, class: "btn btn-primary" %>
+    <%= link_to "New Audience", new_audience_path, class: "btn btn-secondary" %>
+    <%= link_to "New Contact", new_contact_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<!-- Overview Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>Total Campaigns</h3>
+    <div class="stat-value"><%= @total_campaigns %></div>
+    <%= link_to "View All", campaigns_path, style: "font-size: 0.875rem; color: var(--primary); text-decoration: none; margin-top: 0.5rem; display: inline-block;" %>
+  </div>
+  
+  <div class="stat-card">
+    <h3>Total Audiences</h3>
+    <div class="stat-value"><%= @total_audiences %></div>
+    <%= link_to "View All", audiences_path, style: "font-size: 0.875rem; color: var(--primary); text-decoration: none; margin-top: 0.5rem; display: inline-block;" %>
+  </div>
+  
+  <div class="stat-card">
+    <h3>Total Contacts</h3>
+    <div class="stat-value"><%= @total_contacts %></div>
+    <%= link_to "View All", contacts_path, style: "font-size: 0.875rem; color: var(--primary); text-decoration: none; margin-top: 0.5rem; display: inline-block;" %>
+  </div>
+  
+  <div class="stat-card">
+    <h3>Total Budget</h3>
+    <div class="stat-value">$<%= number_with_precision(@total_budget, precision: 0, delimiter: ',') %></div>
+    <small style="color: var(--gray);">Across all campaigns</small>
+  </div>
+</div>
+
+<!-- Performance Metrics -->
+<% if @total_insights > 0 %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Campaign Performance</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Impressions</h3>
+        <div class="stat-value"><%= number_with_delimiter(@total_impressions) %></div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Total Clicks</h3>
+        <div class="stat-value"><%= number_with_delimiter(@total_clicks) %></div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Total Spend</h3>
+        <div class="stat-value">$<%= number_with_precision(@total_spend, precision: 2, delimiter: ',') %></div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Total Conversions</h3>
+        <div class="stat-value"><%= number_with_delimiter(@total_conversions) %></div>
+      </div>
+    </div>
+    
+    <div class="stats-grid" style="margin-top: 1rem;">
+      <div class="stat-card">
+        <h3>Click-Through Rate</h3>
+        <div class="stat-value"><%= number_with_precision(@ctr, precision: 2) %>%</div>
+        <small style="color: var(--gray);">CTR</small>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Conversion Rate</h3>
+        <div class="stat-value"><%= number_with_precision(@conversion_rate, precision: 2) %>%</div>
+        <small style="color: var(--gray);">From clicks</small>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Cost Per Click</h3>
+        <div class="stat-value">$<%= number_with_precision(@cpc, precision: 2) %></div>
+        <small style="color: var(--gray);">CPC</small>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Campaigns with Insights</h3>
+        <div class="stat-value"><%= @campaigns_with_insights %></div>
+        <small style="color: var(--gray);">of <%= @total_campaigns %></small>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- Campaigns by Channel -->
+<% if @campaigns_by_channel.any? %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Campaigns by Channel</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <% @campaigns_by_channel.each do |channel, count| %>
+        <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+          <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.5rem;">
+            <%= channel.present? ? channel.capitalize : 'Unspecified' %>
+          </div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);">
+            <%= count %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- Audiences by Status -->
+<% if @audiences_by_status.any? %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Audiences by Status</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <% @audiences_by_status.each do |status, count| %>
+        <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span class="badge badge-<%= status || 'draft' %>" style="font-size: 0.7rem;">
+              <%= (status || 'draft').capitalize %>
+            </span>
+          </div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);">
+            <%= count %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- Top Performing Campaigns -->
+<% if @top_campaigns.any? %>
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h2>Top Performing Campaigns</h2>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Campaign</th>
+            <th>Channel</th>
+            <th>Impressions</th>
+            <th>Clicks</th>
+            <th>Conversions</th>
+            <th>Spend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @top_campaigns.each do |campaign| %>
+            <tr>
+              <td><strong><%= link_to campaign.name, campaign, style: "color: var(--primary); text-decoration: none;" %></strong></td>
+              <td><span class="badge badge-<%= campaign.channel %>"><%= campaign.channel.capitalize %></span></td>
+              <td><%= number_with_delimiter(campaign.total_impressions) %></td>
+              <td><%= number_with_delimiter(campaign.total_clicks) %></td>
+              <td><%= number_with_delimiter(campaign.total_conversions) %></td>
+              <td>$<%= number_with_precision(campaign.total_spend, precision: 2) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>
+
+<!-- Recent Activity -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+  <!-- Recent Campaigns -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Campaigns</h2>
+      <%= link_to "View All", campaigns_path, style: "font-size: 0.875rem; color: var(--primary); text-decoration: none;" %>
+    </div>
+    <% if @recent_campaigns.any? %>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @recent_campaigns.each do |campaign| %>
+          <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--gray-light);">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <%= link_to campaign.name, campaign, style: "color: var(--primary); text-decoration: none; font-weight: 500;" %>
+                <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.25rem;">
+                  <%= campaign.channel.capitalize %> • $<%= number_with_precision(campaign.budget, precision: 2) %>
+                </div>
+              </div>
+              <span class="badge badge-<%= campaign.channel %>" style="font-size: 0.7rem;">
+                <%= campaign.channel.capitalize %>
+              </span>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="empty-state" style="padding: 1rem 0;">No campaigns yet</p>
+    <% end %>
+  </div>
+
+  <!-- Recent Audiences -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Audiences</h2>
+      <%= link_to "View All", audiences_path, style: "font-size: 0.875rem; color: var(--primary); text-decoration: none;" %>
+    </div>
+    <% if @recent_audiences.any? %>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @recent_audiences.each do |audience| %>
+          <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--gray-light);">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <%= link_to audience.name, audience, style: "color: var(--primary); text-decoration: none; font-weight: 500;" %>
+                <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.25rem;">
+                  <%= pluralize(audience.contacts.count, 'contact') %>
+                </div>
+              </div>
+              <span class="badge badge-<%= audience.status || 'draft' %>" style="font-size: 0.7rem;">
+                <%= (audience.status || 'draft').capitalize %>
+              </span>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="empty-state" style="padding: 1rem 0;">No audiences yet</p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<div class="page-header">
+  <h1>Edit Audience</h1>
+  <%= link_to "Back", @audience, class: "btn btn-secondary" %>
+</div>
+
+<div class="form-container">
+  <%= form_with model: @audience, local: true do |form| %>
+    <% if @audience.errors.any? %>
+      <div class="alert alert-error">
+        <h3><%= pluralize(@audience.errors.count, "error") %> prohibited this audience from being saved:</h3>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <% @audience.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= form.label :name, "Audience Name" %>
+      <%= form.text_field :name, required: true, placeholder: "e.g., Marketing Leads, VIP Customers" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :description %>
+      <%= form.text_area :description, rows: 4, placeholder: "Optional: Describe the purpose or criteria for this audience" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :status %>
+      <%= form.select :status, options_for_select([
+        ['Draft', 'draft'],
+        ['Syncing', 'syncing'],
+        ['Synced', 'synced'],
+        ['Failed', 'failed']
+      ], @audience.status) %>
+      <small style="color: var(--gray); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+        Current status: <span class="badge badge-<%= @audience.status %>"><%= @audience.status.capitalize %></span>
+      </small>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Update Audience", class: "btn btn-primary" %>
+      <%= link_to "Cancel", @audience, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

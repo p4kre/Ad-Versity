@@ -1,0 +1,87 @@
+<div class="page-header">
+  <h1><%= @audience.name %></h1>
+  <div class="action-links">
+    <%= link_to "Edit", edit_audience_path(@audience), class: "btn btn-secondary" %>
+    <%= link_to "Back", audiences_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Audience Details</h2>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+    <div>
+      <strong>Status:</strong>
+      <div><span class="badge badge-<%= @audience.status %>"><%= @audience.status.capitalize %></span></div>
+    </div>
+    <div>
+      <strong>Contacts:</strong>
+      <div><%= @audience.contacts.count %></div>
+    </div>
+  </div>
+  <% if @audience.description.present? %>
+    <div style="margin-top: 1rem;">
+      <strong>Description:</strong>
+      <div style="margin-top: 0.5rem;"><%= @audience.description %></div>
+    </div>
+  <% end %>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Actions</h2>
+  </div>
+  <% if @audience.contacts.any? %>
+    <% if @audience.draft? || @audience.failed? %>
+      <%= button_to "Sync to Meta", sync_to_meta_audience_path(@audience), method: :post, class: "btn btn-success" %>
+    <% elsif @audience.syncing? %>
+      <p style="color: var(--info);">Sync in progress...</p>
+    <% elsif @audience.synced? %>
+      <p style="color: var(--success);">✓ Synced to Meta</p>
+    <% end %>
+  <% else %>
+    <p style="color: var(--gray);">Add contacts to this audience before syncing to Meta.</p>
+  <% end %>
+</div>
+
+<div class="card">
+  <div class="card-header" style="justify-content: space-between;">
+    <h2>Contacts (<%= @audience.contacts.count %>)</h2>
+    <%= link_to "Add Contacts", add_contacts_audience_path(@audience), class: "btn btn-primary btn-sm" %>
+  </div>
+  
+  <% if @audience.contacts.any? %>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Job Title</th>
+            <th>Company</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @audience.contacts.each do |contact| %>
+            <tr>
+              <td><strong><%= "#{contact.first_name} #{contact.last_name}" %></strong></td>
+              <td><%= contact.email %></td>
+              <td><%= contact.job_title %></td>
+              <td><%= contact.company %></td>
+              <td>
+                <%= link_to "Remove", remove_contact_audience_path(@audience, contact_id: contact.id), method: :delete, data: { confirm: "Remove #{contact.first_name} #{contact.last_name} from this audience?" }, class: "text-danger" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <p>No contacts in this audience yet.</p>
+      <%= link_to "Add Contacts", add_contacts_audience_path(@audience), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

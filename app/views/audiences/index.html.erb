@@ -1,0 +1,88 @@
+<div class="page-header">
+  <h1>Audiences</h1>
+  <%= link_to "New Audience", new_audience_path, class: "btn btn-primary" %>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <%= form_with url: audiences_path, method: :get, local: true, class: "search-filter-form" do |form| %>
+    <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; align-items: end;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :search, "Search Audiences" %>
+        <%= form.text_field :search, value: params[:search], placeholder: "Search by name or description...", class: "search-input" %>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= form.label :status, "Filter by Status" %>
+        <%= form.select :status, options_for_select([
+          ['All Statuses', ''],
+          ['Draft', 'draft'],
+          ['Syncing', 'syncing'],
+          ['Synced', 'synced'],
+          ['Failed', 'failed']
+        ], params[:status]), {}, { class: "filter-select" } %>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <%= form.submit "Search", class: "btn btn-primary" %>
+        <% if params[:search].present? || params[:status].present? %>
+          <%= link_to "Clear", audiences_path, class: "btn btn-secondary" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if params[:search].present? || params[:status].present? %>
+  <div style="margin-bottom: 1rem; color: var(--gray);">
+    <%= pluralize(@audiences.count, 'audience') %> found
+    <% if params[:search].present? %>
+      for "<strong><%= params[:search] %></strong>"
+    <% end %>
+    <% if params[:status].present? %>
+      with <strong><%= params[:status].capitalize %></strong> status
+    <% end %>
+  </div>
+<% end %>
+
+<% if @audiences.any? %>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Contacts</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @audiences.each do |audience| %>
+          <tr>
+            <td><strong><%= link_to audience.name, audience, style: "color: var(--primary); text-decoration: none;" %></strong></td>
+            <td><%= audience.description.present? ? truncate(audience.description, length: 50) : "-" %></td>
+            <td><%= audience.contacts.count %></td>
+            <td><span class="badge badge-<%= audience.status || 'draft' %>"><%= (audience.status || 'draft').capitalize %></span></td>
+            <td>
+              <div class="action-links">
+                <%= link_to "View", audience %>
+                <%= link_to "Edit", edit_audience_path(audience) %>
+                <%= link_to "Delete", audience_path(audience), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete '#{audience.name}'? This action cannot be undone." }, class: "text-danger" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card empty-state">
+    <% if params[:search].present? || params[:status].present? %>
+      <h3>No audiences found</h3>
+      <p>Try adjusting your search or filter criteria.</p>
+      <%= link_to "Clear Filters", audiences_path, class: "btn btn-secondary" %>
+    <% else %>
+      <h3>No audiences yet</h3>
+      <p>Get started by creating your first audience.</p>
+      <%= link_to "Create Audience", new_audience_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>
