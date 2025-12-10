@@ -26,23 +26,38 @@ test:
 # For Railway/cloud hosting, DATABASE_URL will be automatically used if set.
 production:
   primary:
-    <<: *default
     # Use PostgreSQL if DATABASE_URL is set (Railway, Heroku, etc.)
     # Otherwise fall back to SQLite for Docker/Kamal deployments
     <% if ENV["DATABASE_URL"] %>
     url: <%= ENV["DATABASE_URL"] %>
     <% else %>
+    <<: *default
     database: storage/production.sqlite3
     <% end %>
   cache:
+    <% if ENV["DATABASE_URL"] %>
+    # Use same PostgreSQL database for cache (Solid Cache uses separate tables)
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
     <<: *default
     database: storage/production_cache.sqlite3
+    <% end %>
     migrations_paths: db/cache_migrate
   queue:
+    <% if ENV["DATABASE_URL"] %>
+    # Use same PostgreSQL database for queue (Solid Queue uses separate tables)
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
     <<: *default
     database: storage/production_queue.sqlite3
+    <% end %>
     migrations_paths: db/queue_migrate
   cable:
+    <% if ENV["DATABASE_URL"] %>
+    # Use same PostgreSQL database for cable (Solid Cable uses separate tables)
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
     <<: *default
     database: storage/production_cable.sqlite3
+    <% end %>
     migrations_paths: db/cable_migrate
