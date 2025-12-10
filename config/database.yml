@@ -23,10 +23,17 @@ test:
 
 # Store production database in the storage/ directory, which by default
 # is mounted as a persistent Docker volume in config/deploy.yml.
+# For Railway/cloud hosting, DATABASE_URL will be automatically used if set.
 production:
   primary:
     <<: *default
+    # Use PostgreSQL if DATABASE_URL is set (Railway, Heroku, etc.)
+    # Otherwise fall back to SQLite for Docker/Kamal deployments
+    <% if ENV["DATABASE_URL"] %>
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
     database: storage/production.sqlite3
+    <% end %>
   cache:
     <<: *default
     database: storage/production_cache.sqlite3
