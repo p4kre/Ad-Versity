@@ -65,7 +65,7 @@ group :test do
   gem "selenium-webdriver"
 end
 # Background processing
-gem "sidekiq", "~> 7.1"
+gem "sidekiq", "~> 8.0"
 
 # Redis  client (required for Sidekiq 7+)
 gem "redis-client", "~> 0.21"
