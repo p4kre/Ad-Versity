@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-  before_action :set_campaign, only: [:show, :edit, :update, :destroy, :fetch_insights]
+  before_action :set_campaign, only: [:show, :edit, :update, :destroy, :fetch_insights, :fetch_linkedin_insights]
 
   def index
     @campaigns = Campaign.all
@@ -52,6 +52,11 @@ class CampaignsController < ApplicationController
 
     FetchInsightsWorker.perform_async(@campaign.id)
     redirect_to @campaign, notice: "Insights fetch started. This may take a few moments."
+  end
+
+  def fetch_linkedin_insights
+    LinkedinFetchInsightsWorker.perform_async(@campaign.id)
+    redirect_to @campaign, notice: "Fetching LinkedIn insights"
   end
 
   private

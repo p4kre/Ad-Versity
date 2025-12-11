@@ -3,10 +3,18 @@ Rails.application.routes.draw do
   
   get "dashboard", to: "dashboard#index"
 
+  # Authentication routes
+  get "signup", to: "users#new", as: :signup
+  post "signup", to: "users#create"
+  get "login", to: "sessions#new", as: :login
+  post "login", to: "sessions#create"
+  delete "logout", to: "sessions#destroy", as: :logout
+
   resources :contacts
   resources :audiences do
     member do
       post :sync_to_meta
+      post :sync_to_linkedin
       get :add_contacts
       post :add_contacts
       delete "remove_contact/:contact_id", action: :remove_contact, as: :remove_contact
@@ -16,6 +24,7 @@ Rails.application.routes.draw do
   resources :campaigns do
     member do
       post :fetch_insights
+      post :fetch_linkedin_insights
     end
   end
 

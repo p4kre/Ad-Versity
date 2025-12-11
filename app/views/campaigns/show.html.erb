@@ -64,7 +64,10 @@
     <h2>Actions</h2>
   </div>
   <% if @campaign.external_id.present? %>
-    <%= button_to "Fetch Insights", fetch_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <%= button_to "Fetch Insights", fetch_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+      <%= button_to "Fetch LinkedIn Insights", fetch_linkedin_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+    </div>
     <p style="margin-top: 0.75rem; color: var(--gray); font-size: 0.875rem;">
       External ID: <code><%= @campaign.external_id %></code>
     </p>

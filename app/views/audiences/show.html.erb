@@ -33,15 +33,19 @@
     <h2>Actions</h2>
   </div>
   <% if @audience.contacts.any? %>
-    <% if @audience.draft? || @audience.failed? %>
-      <%= button_to "Sync to Meta", sync_to_meta_audience_path(@audience), method: :post, class: "btn btn-success" %>
-    <% elsif @audience.syncing? %>
-      <p style="color: var(--info);">Sync in progress...</p>
-    <% elsif @audience.synced? %>
-      <p style="color: var(--success);">✓ Synced to Meta</p>
-    <% end %>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <% if @audience.draft? || @audience.failed? %>
+        <%= button_to "Sync to Meta", sync_to_meta_audience_path(@audience), method: :post, class: "btn btn-success" %>
+        <%= button_to "Sync to LinkedIn", sync_to_linkedin_audience_path(@audience), method: :post, class: "btn btn-success" %>
+      <% elsif @audience.syncing? %>
+        <p style="color: var(--info);">Sync in progress...</p>
+      <% elsif @audience.synced? %>
+        <p style="color: var(--success);">✓ Synced to Meta</p>
+        <%= button_to "Sync to LinkedIn", sync_to_linkedin_audience_path(@audience), method: :post, class: "btn btn-success" %>
+      <% end %>
+    </div>
   <% else %>
-    <p style="color: var(--gray);">Add contacts to this audience before syncing to Meta.</p>
+    <p style="color: var(--gray);">Add contacts to this audience before syncing to Meta or LinkedIn.</p>
   <% end %>
 </div>
 

@@ -1,5 +1,5 @@
 class AudiencesController < ApplicationController
-  before_action :set_audience, only: [:show, :edit, :update, :destroy, :sync_to_meta, :add_contacts, :remove_contact]
+  before_action :set_audience, only: [:show, :edit, :update, :destroy, :sync_to_meta, :sync_to_linkedin, :add_contacts, :remove_contact]
 
   def index
     @audiences = Audience.all
@@ -48,6 +48,13 @@ class AudiencesController < ApplicationController
     @audience.update(status: :syncing)
 
     redirect_to @audience, notice: "Audience sync started. Check status shortly."
+  end
+
+  def sync_to_linkedin
+    LinkedinAudienceSyncWorker.perform_async(@audience.id)
+    @audience.update(status: :syncing)
+
+    redirect_to @audience, notice: "LinkedIn sync started"
   end
 
   def add_contacts
