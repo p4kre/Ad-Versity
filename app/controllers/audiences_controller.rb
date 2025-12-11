@@ -44,6 +44,11 @@ class AudiencesController < ApplicationController
 
   # ⭐ Custom action — Trigger background sync job
   def sync_to_meta
+    unless @audience.contacts.any?
+      redirect_to @audience, alert: "Please add contacts to this audience before syncing."
+      return
+    end
+
     AudienceSyncWorker.perform_async(@audience.id)
     @audience.update(status: :syncing)
 
@@ -51,6 +56,11 @@ class AudiencesController < ApplicationController
   end
 
   def sync_to_linkedin
+    unless @audience.contacts.any?
+      redirect_to @audience, alert: "Please add contacts to this audience before syncing."
+      return
+    end
+
     LinkedinAudienceSyncWorker.perform_async(@audience.id)
     @audience.update(status: :syncing)
 

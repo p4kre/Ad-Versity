@@ -25,6 +25,7 @@ Rails.application.routes.draw do
     member do
       post :fetch_insights
       post :fetch_linkedin_insights
+      post :push_to_linkedin
     end
   end
 

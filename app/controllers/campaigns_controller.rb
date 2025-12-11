@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-  before_action :set_campaign, only: [:show, :edit, :update, :destroy, :fetch_insights, :fetch_linkedin_insights]
+  before_action :set_campaign, only: [:show, :edit, :update, :destroy, :fetch_insights, :fetch_linkedin_insights, :push_to_linkedin]
 
   def index
     @campaigns = Campaign.all
@@ -55,8 +55,18 @@ class CampaignsController < ApplicationController
   end
 
   def fetch_linkedin_insights
+    unless @campaign.external_id.present?
+      redirect_to @campaign, alert: "Campaign must be pushed to LinkedIn first."
+      return
+    end
+
     LinkedinFetchInsightsWorker.perform_async(@campaign.id)
     redirect_to @campaign, notice: "Fetching LinkedIn insights"
+  end
+
+  def push_to_linkedin
+    LinkedinCampaignPushWorker.perform_async(@campaign.id)
+    redirect_to @campaign, notice: "Pushing campaign to LinkedIn. This may take a few moments."
   end
 
   private
@@ -66,6 +76,6 @@ class CampaignsController < ApplicationController
   end
 
   def campaign_params
-    params.require(:campaign).permit(:name, :objective, :budget, :channel, :external_id, audience_ids: [])
+    params.require(:campaign).permit(:name, :objective, :budget, :channel, :external_id, :status, audience_ids: [])
   end
 end

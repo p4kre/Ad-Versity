@@ -13,6 +13,10 @@
   </div>
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
     <div>
+      <strong>Status:</strong>
+      <div><span class="badge badge-<%= @campaign.status %>"><%= @campaign.status.capitalize %></span></div>
+    </div>
+    <div>
       <strong>Channel:</strong>
       <div><span class="badge badge-<%= @campaign.channel %>"><%= @campaign.channel.capitalize %></span></div>
     </div>
@@ -27,7 +31,7 @@
     <% if @campaign.external_id.present? %>
       <div>
         <strong>External ID:</strong>
-        <div><%= @campaign.external_id %></div>
+        <div><code><%= @campaign.external_id %></code></div>
       </div>
     <% end %>
   </div>
@@ -63,55 +67,133 @@
   <div class="card-header">
     <h2>Actions</h2>
   </div>
-  <% if @campaign.external_id.present? %>
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-      <%= button_to "Fetch Insights", fetch_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
-      <%= button_to "Fetch LinkedIn Insights", fetch_linkedin_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
-    </div>
-    <p style="margin-top: 0.75rem; color: var(--gray); font-size: 0.875rem;">
-      External ID: <code><%= @campaign.external_id %></code>
-    </p>
-  <% else %>
-    <div style="padding: 1rem; background-color: #fef3c7; border-radius: var(--radius); color: #92400e;">
-      <strong>⚠️ External ID Required</strong>
-      <p style="margin-top: 0.5rem; margin-bottom: 0;">Please add an External ID to this campaign before fetching insights.</p>
-      <%= link_to "Edit Campaign", edit_campaign_path(@campaign), class: "btn btn-secondary btn-sm", style: "margin-top: 0.75rem;" %>
-    </div>
-  <% end %>
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+    <% if @campaign.draft? %>
+      <%= button_to "Push Campaign to LinkedIn", push_to_linkedin_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+    <% elsif @campaign.external_id.present? %>
+      <%= button_to "Fetch Insights", fetch_linkedin_insights_campaign_path(@campaign), method: :post, class: "btn btn-primary" %>
+      <% if @campaign.synced? %>
+        <span style="color: var(--success); display: flex; align-items: center; padding: 0.625rem 1.25rem;">
+          ✓ Pushed to LinkedIn
+        </span>
+      <% end %>
+    <% else %>
+      <div style="padding: 1rem; background-color: #fef3c7; border-radius: var(--radius); color: #92400e;">
+        <strong>⚠️ Campaign Not Pushed</strong>
+        <p style="margin-top: 0.5rem; margin-bottom: 0;">Push this campaign to LinkedIn to get started.</p>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <% if @campaign.insights.any? %>
+  <% latest_insight = @campaign.latest_insight %>
   <div class="card">
     <div class="card-header">
-      <h2>Insights</h2>
+      <h2>Campaign Insights Dashboard</h2>
     </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Impressions</th>
-            <th>Clicks</th>
-            <th>Spend</th>
-            <th>Conversions</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @campaign.insights.order(created_at: :desc).each do |insight| %>
+    
+    <!-- Latest Insights Summary -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">Impressions</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);"><%= number_with_delimiter(latest_insight.impressions) %></div>
+      </div>
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">Clicks</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);"><%= number_with_delimiter(latest_insight.clicks) %></div>
+      </div>
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">Spend</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);">$<%= number_with_precision(latest_insight.spend, precision: 2) %></div>
+      </div>
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">CTR</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);"><%= @campaign.ctr %>%</div>
+      </div>
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">CPC</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);">$<%= number_with_precision(@campaign.cpc, precision: 2) %></div>
+      </div>
+      <div style="padding: 1rem; background: var(--light); border-radius: var(--radius);">
+        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem;">Conversions</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark);"><%= number_with_delimiter(latest_insight.conversions) %></div>
+      </div>
+    </div>
+
+    <!-- Historical Insights Chart -->
+    <% if @campaign.insights.count > 1 %>
+      <div style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Historical Performance</h3>
+        <%= line_chart @campaign.insights.order(created_at: :asc).map { |i| [i.created_at.strftime("%m/%d %H:%M"), i.clicks] }.to_h,
+            library: { title: "Clicks Over Time", vAxis: { title: "Clicks" }, hAxis: { title: "Time" } } %>
+      </div>
+    <% end %>
+
+    <!-- Historical Insights Table -->
+    <div>
+      <h3 style="margin-bottom: 1rem;">Historical Insights</h3>
+      <div class="table-container">
+        <table>
+          <thead>
             <tr>
-              <td><%= number_with_delimiter(insight.impressions) %></td>
-              <td><%= number_with_delimiter(insight.clicks) %></td>
-              <td>$<%= number_with_precision(insight.spend, precision: 2) %></td>
-              <td><%= number_with_delimiter(insight.conversions) %></td>
-              <td><%= insight.updated_at.strftime("%B %d, %Y at %I:%M %p") %></td>
+              <th>Date</th>
+              <th>Impressions</th>
+              <th>Clicks</th>
+              <th>Spend</th>
+              <th>Conversions</th>
+              <th>CTR</th>
+              <th>CPC</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% @campaign.insights.order(created_at: :desc).each do |insight| %>
+              <tr>
+                <td><%= insight.created_at.strftime("%B %d, %Y at %I:%M %p") %></td>
+                <td><%= number_with_delimiter(insight.impressions) %></td>
+                <td><%= number_with_delimiter(insight.clicks) %></td>
+                <td>$<%= number_with_precision(insight.spend, precision: 2) %></td>
+                <td><%= number_with_delimiter(insight.conversions) %></td>
+                <td>
+                  <% ctr = insight.impressions > 0 ? (insight.clicks.to_f / insight.impressions * 100).round(2) : 0.0 %>
+                  <%= ctr %>%
+                </td>
+                <td>
+                  <% cpc = insight.clicks > 0 ? (insight.spend / insight.clicks).round(2) : 0.0 %>
+                  $<%= number_with_precision(cpc, precision: 2) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 <% else %>
   <div class="card">
-    <p class="empty-state">No insights yet. Click "Fetch Insights" to retrieve campaign data.</p>
+    <p class="empty-state">No insights yet. Push the campaign to LinkedIn and then fetch insights to see performance data.</p>
+  </div>
+<% end %>
+
+<% if @campaign.attributions.any? %>
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Engagement</h2>
+    </div>
+    <div style="padding: 1rem 0;">
+      <% @campaign.recent_attributions(10).each do |attribution| %>
+        <div style="padding: 0.75rem; border-bottom: 1px solid var(--gray-light); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong><%= "#{attribution.contact.first_name} #{attribution.contact.last_name}" %></strong>
+            <span style="color: var(--gray); margin-left: 0.5rem;">
+              clicked the ad
+            </span>
+          </div>
+          <div style="color: var(--gray); font-size: 0.875rem;">
+            <%= time_ago_in_words(attribution.timestamp) %> ago
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 <% end %>

@@ -69,6 +69,7 @@ group :test do
 end
 # Background processing
 gem "sidekiq", "~> 7.1"
+gem "sidekiq-scheduler", "~> 5.0"
 
 # Redis  client (required for Sidekiq 7+)
 gem "redis-client", "~> 0.21"
@@ -77,3 +78,5 @@ gem "redis-client", "~> 0.21"
 gem "httparty"
 # Fake data for seeds
 gem "faker"
+# Charts for analytics
+gem "chartkick"

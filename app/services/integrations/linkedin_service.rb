@@ -23,13 +23,29 @@ module Integrations
     def fetch_campaign_insights(campaign)
       raise ArgumentError, "Campaign must have an external_id" unless campaign.external_id.present?
 
+      # Use full URL for mock endpoint
       self.class.get(
-        "/campaigns/#{campaign.external_id}/insights",
+        "https://mockapi.io/api/v1/mock/linkedin/campaigns/#{campaign.external_id}/insights",
         headers: @headers,
         timeout: 30
       )
     rescue HTTParty::Error => e
       Rails.logger.error "HTTP error fetching LinkedIn insights: #{e.message}"
+      raise
+    end
+
+    def push_campaign(campaign)
+      body = {
+        name: campaign.name,
+        objective: campaign.objective,
+        budget: campaign.budget,
+        audiences: campaign.audiences.map { |a| { id: a.id, name: a.name } }
+      }
+
+      # Use full URL for mock endpoint
+      self.class.post("https://mockapi.io/api/v1/mock/linkedin/campaigns", headers: @headers, body: body.to_json)
+    rescue HTTParty::Error => e
+      Rails.logger.error "HTTP error pushing LinkedIn campaign: #{e.message}"
       raise
     end
   end

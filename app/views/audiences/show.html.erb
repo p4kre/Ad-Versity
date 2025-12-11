@@ -32,21 +32,37 @@
   <div class="card-header">
     <h2>Actions</h2>
   </div>
-  <% if @audience.contacts.any? %>
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-      <% if @audience.draft? || @audience.failed? %>
-        <%= button_to "Sync to Meta", sync_to_meta_audience_path(@audience), method: :post, class: "btn btn-success" %>
-        <%= button_to "Sync to LinkedIn", sync_to_linkedin_audience_path(@audience), method: :post, class: "btn btn-success" %>
-      <% elsif @audience.syncing? %>
-        <p style="color: var(--info);">Sync in progress...</p>
-      <% elsif @audience.synced? %>
-        <p style="color: var(--success);">✓ Synced to Meta</p>
-        <%= button_to "Sync to LinkedIn", sync_to_linkedin_audience_path(@audience), method: :post, class: "btn btn-success" %>
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+    <% if @audience.draft? || @audience.failed? %>
+      <% if @audience.contacts.any? %>
+        <%= form_with url: sync_to_meta_audience_path(@audience), method: :post, local: true, data: { controller: "sync-button", action: "submit->sync-button#handleSubmit" }, style: "display: inline-block;" do |f| %>
+          <%= f.submit "Sync to Meta", class: "btn btn-success", data: { sync_button_target: "button" } %>
+        <% end %>
+        <%= form_with url: sync_to_linkedin_audience_path(@audience), method: :post, local: true, data: { controller: "sync-button", action: "submit->sync-button#handleSubmit" }, style: "display: inline-block;" do |f| %>
+          <%= f.submit "Sync to LinkedIn", class: "btn btn-success", data: { sync_button_target: "button" } %>
+        <% end %>
+      <% else %>
+        <%= form_with url: sync_to_meta_audience_path(@audience), method: :post, local: true, data: { controller: "sync-button", action: "submit->sync-button#handleSubmit" }, style: "display: inline-block;" do |f| %>
+          <%= f.submit "Sync to Meta", class: "btn btn-success", disabled: true, title: "Add contacts to this audience before syncing", data: { sync_button_target: "button" } %>
+        <% end %>
+        <%= form_with url: sync_to_linkedin_audience_path(@audience), method: :post, local: true, data: { controller: "sync-button", action: "submit->sync-button#handleSubmit" }, style: "display: inline-block;" do |f| %>
+          <%= f.submit "Sync to LinkedIn", class: "btn btn-success", disabled: true, title: "Add contacts to this audience before syncing", data: { sync_button_target: "button" } %>
+        <% end %>
+        <span style="color: var(--gray); font-size: 0.875rem; margin-left: 0.5rem;">
+          <em>Add contacts first to enable syncing</em>
+        </span>
       <% end %>
-    </div>
-  <% else %>
-    <p style="color: var(--gray);">Add contacts to this audience before syncing to Meta or LinkedIn.</p>
-  <% end %>
+    <% elsif @audience.syncing? %>
+      <p style="color: var(--info); margin: 0;">Sync in progress...</p>
+    <% elsif @audience.synced? %>
+      <p style="color: var(--success); margin: 0;">✓ Synced to Meta</p>
+      <% if @audience.contacts.any? %>
+        <%= form_with url: sync_to_linkedin_audience_path(@audience), method: :post, local: true, data: { controller: "sync-button", action: "submit->sync-button#handleSubmit" }, style: "display: inline-block;" do |f| %>
+          <%= f.submit "Sync to LinkedIn", class: "btn btn-success", data: { sync_button_target: "button" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
 </div>
 
 <div class="card">

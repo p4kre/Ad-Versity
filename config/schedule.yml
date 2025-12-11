@@ -1,0 +1,4 @@
+linkedin_insights_sync:
+  cron: "0 */6 * * *"  # Every 6 hours
+  class: "LinkedinInsightsBatchWorker"
+  queue: default
