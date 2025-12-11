@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_11_003259) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_11_010859) do
+  create_table "attributions", force: :cascade do |t|
+    t.integer "campaign_id", null: false
+    t.integer "contact_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.datetime "timestamp", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id"], name: "index_attributions_on_campaign_id"
+    t.index ["contact_id"], name: "index_attributions_on_contact_id"
+    t.index ["event_type"], name: "index_attributions_on_event_type"
+    t.index ["timestamp"], name: "index_attributions_on_timestamp"
+  end
+
   create_table "audience_contacts", force: :cascade do |t|
     t.integer "audience_id", null: false
     t.integer "contact_id", null: false
@@ -44,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_11_003259) do
     t.string "external_id"
     t.string "name"
     t.string "objective"
+    t.string "status", default: "draft"
     t.datetime "updated_at", null: false
   end
 
